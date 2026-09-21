@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SmartBin-1 | Touchless Public Access</title>
+  
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* Mobile app container overrides */
+    body {
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-wrapper">
+    <div class="mobile-card">
+      
+      <!-- Top header with device icon -->
+      <div class="ble-header-icon" id="bleStatusIcon">
+        <svg id="bluetoothSvg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+        </svg>
+      </div>
+
+      <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.35rem;">SmartBin-1</h1>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Hands-Free Waste Disposal Access
+      </p>
+
+      <!-- Connection Pill Badge -->
+      <div id="connectionPill" class="connection-pill pill-disconnected">
+        <span class="status-indicator-dot"></span>
+        <span id="connectionPillText">Ready to Connect</span>
+      </div>
+
+      <!-- Main Action Area -->
+      <div id="actionArea" style="margin-top: 1rem;">
+        
+        <!-- State 1: Connect Button (Visible when disconnected) -->
+        <div id="connectState">
+          <button id="connectBtn" class="action-btn btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M2 12h20"/>
+            </svg>
+            <span>Connect to SmartBin</span>
+          </button>
+
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+            Ensure Bluetooth is turned on and you are within 3 meters of the bin.
+          </p>
+
+          <!-- Simulation mode option for desktop / test evaluation -->
+          <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <button id="simulateConnectBtn" class="filter-btn" style="width:100%; padding:0.6rem; font-size:0.8rem;">
+              🧪 Test Mode: Simulate BLE Connection
+            </button>
+          </div>
+        </div>
+
+        <!-- State 2: Connected Controls (Hidden initially, shown upon successful connection) -->
+        <div id="connectedState" style="display: none;">
+          
+          <div id="lidReadyView">
+            <button id="openLidBtn" class="action-btn btn-success">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              </svg>
+              <span>OPEN LID</span>
+            </button>
+            <p style="font-size: 0.8rem; color: #34d399; margin-top: 0.75rem; font-weight: 500;">
+              ✓ Connected to SmartBin-1 (GATT Server Active)
+            </p>
+          </div>
+
+          <!-- State 3: Lid Opened / Countdown Animation -->
+          <div id="lidOpenView" style="display: none;">
+            <div class="timer-ring-container">
+              <div class="pulse-circle"></div>
+              <div class="timer-countdown" id="countdownSecs">5</div>
+            </div>
+            <p style="font-size: 1.1rem; font-weight: 700; color: #10b981;">Lid is Open!</p>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Drop waste now. Auto-closing in seconds...</p>
+          </div>
+
+          <!-- Disconnect Button -->
+          <button id="disconnectBtn" class="action-btn btn-disconnect">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>Disconnect</span>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- Mini Live Activity Log -->
+      <div class="ble-terminal" id="terminalLog">
+        <div class="ble-terminal-line">[SYS] Initialized Web Bluetooth service.</div>
+        <div class="ble-terminal-line">[INFO] Target Service UUID: 12345678-1234-5678-1234-56789abcdef0</div>
+      </div>
+
+      <!-- Navigation link -->
+      <div style="margin-top: 1.5rem;">
+        <a href="dashboard.html" style="font-size: 0.8rem; color: var(--color-info); text-decoration: none;">
+          ← Return to Collector Operations Dashboard
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/mock_data.js"></script>
+  <script src="js/firebase_config.js"></script>
+  <script>
+    // Configuration specified in Task 3
+    const BLE_CONFIG = {
+      deviceName: "SmartBin-1",
+      serviceUuid: "12345678-1234-5678-1234-56789abcdef0",
+      charLidUuid: "12345678-1234-5678-1234-56789abcdef1"
+    };
+
+    // DOM Elements
+    const connectState = document.getElementById("connectState");
+    const connectedState = document.getElementById("connectedState");
+    const lidReadyView = document.getElementById("lidReadyView");
+    const lidOpenView = document.getElementById("lidOpenView");
+    const countdownSecs = document.getElementById("countdownSecs");
+    const connectBtn = document.getElementById("connectBtn");
+    const simulateConnectBtn = document.getElementById("simulateConnectBtn");
+    const openLidBtn = document.getElementById("openLidBtn");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+    const connectionPill = document.getElementById("connectionPill");
+    const connectionPillText = document.getElementById("connectionPillText");
+    const bleStatusIcon = document.getElementById("bleStatusIcon");
+    const terminalLog = document.getElementById("terminalLog");
+
+    // Bluetooth connection handles
+    let bluetoothDevice = null;
+    let gattServer = null;
+    let lidCharacteristic = null;
+    let isSimulated = false;
+    let countdownInterval = null;
+
+    function log(msg) {
+      const line = document.createElement("div");
+      line.className = "ble-terminal-line";
+      const timestamp = new Date().toLocaleTimeString();
+      line.textContent = `[${timestamp}] ${msg}`;
+      terminalLog.appendChild(line);
+      terminalLog.scrollTop = terminalLog.scrollHeight;
+    }
+
+    // Set UI to Connected State
+    function setConnectedUI(deviceName) {
+      connectState.style.display = "none";
+      connectedState.style.display = "block";
+      lidReadyView.style.display = "block";
+      lidOpenView.style.display = "none";
+
+      bleStatusIcon.classList.add("connected");
+      connectionPill.className = "connection-pill pill-connected";
+      connectionPillText.textContent = `Connected: ${deviceName}`;
+    }
+
+    // Set UI to Disconnected State
+    function setDisconnectedUI(reason = "Disconnected") {
+      connectedState.style.display = "none";
+      connectState.style.display = "block";
+
+      bleStatusIcon.classList.remove("connected");
+      connectionPill.className = "connection-pill pill-disconnected";
+      connectionPillText.textContent = reason;
+
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    }
+
+    // Handle Hardware Disconnect Event
+    function onDisconnected(event) {
+      const device = event.target;
+      log(`Device ${device.name || "SmartBin"} disconnected.`);
+      bluetoothDevice = null;
+      gattServer = null;
+      lidCharacteristic = null;
+      setDisconnectedUI("Disconnected");
+    }
+
+    // Connect via Web Bluetooth API
+    async function requestBleConnection() {
+      if (!navigator.bluetooth) {
+        log("Web Bluetooth is not supported on this browser/platform.");
+        alert("Web Bluetooth API is not available on this browser. Please use Chrome/Edge or click 'Test Mode: Simulate BLE Connection'.");
+        return;
+      }
+
+      try {
+        log(`Scanning for Bluetooth device named '${BLE_CONFIG.deviceName}'...`);
+        connectionPillText.textContent = "Requesting device...";
+
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+          filters: [
+            { name: BLE_CONFIG.deviceName },
+            { services: [BLE_CONFIG.serviceUuid] }
+          ],
+          optionalServices: [BLE_CONFIG.serviceUuid]
+        });
+
+        log(`Device selected: ${bluetoothDevice.name}. Connecting to GATT Server...`);
+        bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+        gattServer = await bluetoothDevice.gatt.connect();
+        log("Connected to GATT Server.");
+
+        log(`Discovering Primary Service (${BLE_CONFIG.serviceUuid})...`);
+        const service = await gattServer.getPrimaryService(BLE_CONFIG.serviceUuid);
+
+        log(`Discovering Characteristic (${BLE_CONFIG.charLidUuid})...`);
+        try {
+          lidCharacteristic = await service.getCharacteristic(BLE_CONFIG.charLidUuid);
+          log("Lid Characteristic discovered successfully.");
+        } catch (charErr) {
+          log("Characteristic not found; falling back to service-level commands.");
+        }
+
+        isSimulated = false;
+        setConnectedUI(bluetoothDevice.name || BLE_CONFIG.deviceName);
+        log("Ready! Tap 'OPEN LID' to actuate servo.");
+
+      } catch (err) {
+        log(`Connection Error: ${err.message || err}`);
+        setDisconnectedUI("Connection failed");
+      }
+    }
+
+    // Trigger Lid Open Command
+    async function triggerOpenLid() {
+      log("Sending OPEN command to SmartBin-1...");
+
+      try {
+        if (!isSimulated && lidCharacteristic) {
+          // Send 0x01 byte to characteristic to open lid
+          const command = new Uint8Array([0x01]);
+          await lidCharacteristic.writeValue(command);
+          log("BLE GATT write successful: 0x01 (OPEN)");
+        } else {
+          log("[MOCK] Sent 0x01 OPEN command over virtual BLE channel.");
+        }
+
+        // Notify Database layer (Firebase or Mock)
+        if (window.smartBinDB) {
+          window.smartBinDB.updateBin("SmartBin-1", { lidStatus: "Open" });
+        }
+
+        // Display Opening / Countdown UI
+        lidReadyView.style.display = "none";
+        lidOpenView.style.display = "block";
+
+        let secondsRemaining = 5;
+        countdownSecs.textContent = secondsRemaining;
+
+        countdownInterval = setInterval(() => {
+          secondsRemaining--;
+          countdownSecs.textContent = secondsRemaining;
+
+          if (secondsRemaining <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+
+            log("Timer elapsed: Lid auto-closed.");
+            // Send close command or update database
+            if (window.smartBinDB) {
+              const isBio = Math.random() > 0.5;
+              window.smartBinDB.simulateDeposit("SmartBin-1", isBio);
+              window.smartBinDB.updateBin("SmartBin-1", { lidStatus: "Closed" });
+            }
+
+            lidOpenView.style.display = "none";
+            lidReadyView.style.display = "block";
+          }
+        }, 1000);
+
+      } catch (err) {
+        log(`Failed to write command: ${err.message || err}`);
+      }
+    }
+
+    // Disconnect Action
+    function disconnectDevice() {
+      if (isSimulated) {
+        log("Virtual device disconnected.");
+        isSimulated = false;
+        setDisconnectedUI("Disconnected");
+      } else if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+        log("Disconnecting from GATT server...");
+        bluetoothDevice.gatt.disconnect();
+      } else {
+        setDisconnectedUI("Disconnected");
+      }
+    }
+
+    // Simulation / Test Mode trigger
+    function simulateConnection() {
+      log("Starting simulation mode for testing...");
+      isSimulated = true;
+      setTimeout(() => {
+        log("Virtual GATT Server connected to 'SmartBin-1'.");
+        setConnectedUI("SmartBin-1 (Simulated)");
+      }, 500);
+    }
+
+    // Event Listeners
+    connectBtn.addEventListener("click", requestBleConnection);
+    simulateConnectBtn.addEventListener("click", simulateConnection);
+    openLidBtn.addEventListener("click", triggerOpenLid);
+    disconnectBtn.addEventListener("click", disconnectDevice);
+
+    // Support query param for preview / testing: ?state=connected
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('state') === 'connected') {
+      simulateConnection();
+    } else if (urlParams.get('state') === 'open') {
+      simulateConnection();
+      setTimeout(triggerOpenLid, 300);
+    }
+  </script>
+</body>
+</html>
