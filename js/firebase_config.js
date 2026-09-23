@@ -1,21 +1,11 @@
 /**
- * Firebase Realtime Database Configuration & Mock Simulation Layer
- * 
- * Provides transparent switching between live Firebase Realtime Database
- * and an offline/mock in-memory simulation for local testing.
+ * SmartBin OS
+ * Firebase Realtime Database Service
  */
 
-// Production / Development Firebase Credentials
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase Compat SDK
 const firebaseConfig = {
-  apiKey: "AIzaSyBZvpPhp2t72M42Qp6pcCRBpNs4AjMJj4E",
+  apiKey: "AIzaSyBZvpPhp2t72M42Qp6pcCRBpNs4jMJj4E",
   authDomain: "smart-dustbin-b0686.firebaseapp.com",
   databaseURL: "https://smart-dustbin-b0686-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "smart-dustbin-b0686",
@@ -26,141 +16,277 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+firebase.initializeApp(firebaseConfig);
+
+const database = firebase.database();
+
 
 class SmartBinDatabaseService {
+
   constructor() {
-    this.isMock = true; // Default to mock mode for offline / test evaluation
     this.listeners = [];
     this.bins = [];
-    this.simulationTimer = null;
+    this.binsRef = database.ref("/bins");
+
     this.init();
   }
 
+
   init() {
-    console.log("[SmartBinDB] Initializing Database Service (Mode: Mock Simulation)");
-    // Load from localStorage or fallback to INITIAL_MOCK_BINS
-    const saved = localStorage.getItem("smart_dustbin_state");
-    if (saved) {
-      try {
-        this.bins = JSON.parse(saved);
-      } catch (e) {
-        this.bins = [...(window.INITIAL_MOCK_BINS || [])];
+
+    console.log(
+      "[SmartBinDB] Initializing Firebase Realtime Database..."
+    );
+
+    // Listen for REAL Firebase changes
+    this.binsRef.on(
+      "value",
+      (snapshot) => {
+
+        const data = snapshot.val();
+
+        console.log(
+          "[SmartBinDB] Firebase data received:",
+          data
+        );
+
+        if (!data) {
+          this.bins = [];
+        } else {
+
+          this.bins = Object.values(data).map(bin => {
+
+            return {
+              id: bin.id || "Unknown",
+              name: bin.name || "Unknown Location",
+
+              lat: bin.location?.lat || 19.0760,
+              lng: bin.location?.lng || 72.8777,
+
+              fillPercentage: Number(
+                bin.fill_percentage || 0
+              ),
+
+              biodegradableCount: Number(
+                bin.biodegradable_count || 0
+              ),
+
+              nonBiodegradableCount: Number(
+                bin.non_biodegradable_count || 0
+              ),
+
+              batteryLevel: Number(
+                bin.battery_level || 95
+              ),
+
+              lidStatus:
+                bin.lid_status || "Closed",
+
+              lastUpdated:
+                bin.last_updated ||
+                new Date().toISOString(),
+
+              status:
+                bin.status || "Normal"
+            };
+
+          });
+        }
+
+        // Send Firebase data to dashboard
+        this.notifyListeners();
+
+      },
+      (error) => {
+
+        console.error(
+          "[SmartBinDB] Firebase error:",
+          error
+        );
+
       }
-    } else {
-      this.bins = [...(window.INITIAL_MOCK_BINS || [])];
-      this.persist();
-    }
+    );
   }
 
-  persist() {
-    localStorage.setItem("smart_dustbin_state", JSON.stringify(this.bins));
-  }
 
   /**
-   * Subscribe to live updates
-   * @param {Function} callback receives bins array
+   * Subscribe dashboard to Firebase updates
    */
   onValue(callback) {
+
     this.listeners.push(callback);
-    // Immediately emit current state
-    callback(this.bins);
+
+    // Send current data immediately
+    if (this.bins.length > 0) {
+      callback(this.bins);
+    }
+
     return () => {
-      this.listeners = this.listeners.filter(cb => cb !== callback);
+
+      this.listeners =
+        this.listeners.filter(
+          cb => cb !== callback
+        );
+
     };
   }
 
-  notifyListeners() {
-    this.persist();
-    for (const listener of this.listeners) {
-      listener(this.bins);
-    }
-  }
 
   /**
-   * Fetch all bins
+   * Notify dashboard listeners
+   */
+  notifyListeners() {
+
+    for (const listener of this.listeners) {
+
+      listener(this.bins);
+
+    }
+
+  }
+
+
+  /**
+   * Get current bins
    */
   async getBins() {
+
     return [...this.bins];
+
   }
 
-  /**
-   * Update a specific bin
-   */
-  async updateBin(binId, partialData) {
-    const idx = this.bins.findIndex(b => b.id === binId);
-    if (idx !== -1) {
-      this.bins[idx] = {
-        ...this.bins[idx],
-        ...partialData,
-        lastUpdated: new Date().toISOString()
-      };
-      // Recalculate status based on fill percentage
-      const fill = this.bins[idx].fillPercentage;
-      if (fill >= 80) this.bins[idx].status = "Critical";
-      else if (fill >= 50) this.bins[idx].status = "Warning";
-      else this.bins[idx].status = "Normal";
 
-      this.notifyListeners();
-      return this.bins[idx];
+  /**
+   * Simulate deposit directly in Firebase
+   *
+   * Useful for testing the dashboard.
+   */
+  async simulateDeposit(
+    binId = "SmartBin-1",
+    isBio = true
+  ) {
+
+    const binRef =
+      database.ref(`/bins/${binId}`);
+
+    const snapshot =
+      await binRef.once("value");
+
+    const bin = snapshot.val();
+
+    if (!bin) {
+
+      console.error(
+        "Bin not found:",
+        binId
+      );
+
+      return;
+
     }
-    return null;
+
+    const currentBio =
+      Number(bin.biodegradable_count || 0);
+
+    const currentNonBio =
+      Number(bin.non_biodegradable_count || 0);
+
+
+    const updates = {};
+
+    if (isBio) {
+
+      updates.biodegradable_count =
+        currentBio + 1;
+
+    } else {
+
+      updates.non_biodegradable_count =
+        currentNonBio + 1;
+
+    }
+
+
+    updates.last_updated =
+      new Date().toISOString();
+
+
+    await binRef.update(updates);
+
+    console.log(
+      "[SmartBinDB] Firebase deposit:",
+      isBio
+        ? "BIODEGRADABLE"
+        : "NON-BIODEGRADABLE"
+    );
+
   }
 
-  /**
-   * Simulate a disposal event (e.g. from IoT trigger or BLE open event)
-   */
-  simulateDeposit(binId = "SmartBin-1", isBio = true) {
-    const bin = this.bins.find(b => b.id === binId);
-    if (!bin) return;
-
-    const newBio = isBio ? bin.biodegradableCount + 1 : bin.biodegradableCount;
-    const newNonBio = !isBio ? bin.nonBiodegradableCount + 1 : bin.nonBiodegradableCount;
-    const newFill = Math.min(100, bin.fillPercentage + Math.floor(Math.random() * 5) + 2);
-
-    this.updateBin(binId, {
-      biodegradableCount: newBio,
-      nonBiodegradableCount: newNonBio,
-      fillPercentage: newFill,
-      lidStatus: "Closed"
-    });
-  }
 
   /**
-   * Reset data to initial mock state
-   */
-  resetToDefaults() {
-    this.bins = JSON.parse(JSON.stringify(window.INITIAL_MOCK_BINS || []));
-    this.notifyListeners();
-  }
-
-  /**
-   * Start periodic simulation of waste collection & disposal
+   * Start dashboard-side simulation
    */
   startAutoSimulation(intervalMs = 8000) {
+
     if (this.simulationTimer) return;
-    console.log("[SmartBinDB] Auto simulation enabled.");
-    this.simulationTimer = setInterval(() => {
-      // Pick random bin
-      if (this.bins.length === 0) return;
-      const randomBin = this.bins[Math.floor(Math.random() * this.bins.length)];
-      const isBio = Math.random() > 0.45;
-      this.simulateDeposit(randomBin.id, isBio);
-    }, intervalMs);
+
+    console.log(
+      "[SmartBinDB] Firebase auto simulation enabled."
+    );
+
+    this.simulationTimer =
+      setInterval(async () => {
+
+        if (this.bins.length === 0) return;
+
+        const randomBin =
+          this.bins[
+            Math.floor(
+              Math.random() *
+              this.bins.length
+            )
+          ];
+
+        const isBio =
+          Math.random() > 0.45;
+
+        await this.simulateDeposit(
+          randomBin.id,
+          isBio
+        );
+
+      }, intervalMs);
+
   }
+
 
   stopAutoSimulation() {
+
     if (this.simulationTimer) {
-      clearInterval(this.simulationTimer);
+
+      clearInterval(
+        this.simulationTimer
+      );
+
       this.simulationTimer = null;
-      console.log("[SmartBinDB] Auto simulation stopped.");
+
+      console.log(
+        "[SmartBinDB] Auto simulation stopped."
+      );
+
     }
+
   }
+
 }
 
-// Global Singleton Database Instance
-const smartBinDB = new SmartBinDatabaseService();
-window.smartBinDB = smartBinDB;
-window.firebaseConfig = firebaseConfig;
 
+// Create global service
+const smartBinDB =
+  new SmartBinDatabaseService();
+
+window.smartBinDB =
+  smartBinDB;
+
+window.firebaseConfig =
+  firebaseConfig;
