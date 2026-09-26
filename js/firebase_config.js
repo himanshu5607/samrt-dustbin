@@ -85,6 +85,8 @@ class SmartBinDatabaseService {
               lastUpdated:
                 bin.last_updated ||
                 new Date().toISOString(),
+              lastReset:
+                bin.last_reset || null,
 
               status:
                 bin.status || "Normal"
@@ -184,6 +186,32 @@ class SmartBinDatabaseService {
       return;
 
     }
+    /**
+ * Reset current waste counts after garbage collection
+ */
+async resetWasteCounts(binId = "SmartBin-1") {
+
+  const binRef = database.ref(`/bins/${binId}`);
+
+  const resetDate = new Date().toISOString();
+
+  const updates = {
+    biodegradable_count: 0,
+    non_biodegradable_count: 0,
+    last_reset: resetDate,
+    last_updated: resetDate
+  };
+
+  await binRef.update(updates);
+
+  console.log(
+    "[SmartBinDB] Waste counts reset:",
+    binId,
+    resetDate
+  );
+
+  return resetDate;
+}
 
     const currentBio =
       Number(bin.biodegradable_count || 0);
