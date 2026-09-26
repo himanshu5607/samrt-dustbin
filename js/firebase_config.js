@@ -3,7 +3,10 @@
  * Firebase Realtime Database Service
  */
 
-// Firebase Compat SDK
+// ============================================================
+// Firebase Configuration
+// ============================================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyBZvpPhp2t72M42Qp6pcCRBpNs4jMJj4E",
   authDomain: "smart-dustbin-b0686.firebaseapp.com",
@@ -15,22 +18,39 @@ const firebaseConfig = {
   measurementId: "G-4Y82SYWY91"
 };
 
+
+// ============================================================
 // Initialize Firebase
+// ============================================================
+
 firebase.initializeApp(firebaseConfig);
 
 const database = firebase.database();
 
 
+// ============================================================
+// SmartBin Database Service
+// ============================================================
+
 class SmartBinDatabaseService {
 
   constructor() {
+
     this.listeners = [];
+
     this.bins = [];
+
     this.binsRef = database.ref("/bins");
+
+    this.simulationTimer = null;
 
     this.init();
   }
 
+
+  // ==========================================================
+  // Firebase Realtime Listener
+  // ==========================================================
 
   init() {
 
@@ -38,67 +58,99 @@ class SmartBinDatabaseService {
       "[SmartBinDB] Initializing Firebase Realtime Database..."
     );
 
-    // Listen for REAL Firebase changes
+
     this.binsRef.on(
       "value",
+
       (snapshot) => {
 
         const data = snapshot.val();
+
 
         console.log(
           "[SmartBinDB] Firebase data received:",
           data
         );
 
+
         if (!data) {
+
           this.bins = [];
+
         } else {
 
-          this.bins = Object.values(data).map(bin => {
+          this.bins = Object.values(data).map(
+            (bin) => {
 
-            return {
-              id: bin.id || "Unknown",
-              name: bin.name || "Unknown Location",
+              return {
 
-              lat: bin.location?.lat || 19.0760,
-              lng: bin.location?.lng || 72.8777,
+                id:
+                  bin.id || "Unknown",
 
-              fillPercentage: Number(
-                bin.fill_percentage || 0
-              ),
+                name:
+                  bin.name || "Unknown Location",
 
-              biodegradableCount: Number(
-                bin.biodegradable_count || 0
-              ),
 
-              nonBiodegradableCount: Number(
-                bin.non_biodegradable_count || 0
-              ),
+                lat:
+                  bin.location?.lat || 19.0760,
 
-              batteryLevel: Number(
-                bin.battery_level || 95
-              ),
+                lng:
+                  bin.location?.lng || 72.8777,
 
-              lidStatus:
-                bin.lid_status || "Closed",
 
-              lastUpdated:
-                bin.last_updated ||
-                new Date().toISOString(),
-              lastReset:
-                bin.last_reset || null,
+                fillPercentage:
+                  Number(
+                    bin.fill_percentage || 0
+                  ),
 
-              status:
-                bin.status || "Normal"
-            };
 
-          });
+                biodegradableCount:
+                  Number(
+                    bin.biodegradable_count || 0
+                  ),
+
+
+                nonBiodegradableCount:
+                  Number(
+                    bin.non_biodegradable_count || 0
+                  ),
+
+
+                batteryLevel:
+                  Number(
+                    bin.battery_level || 95
+                  ),
+
+
+                lidStatus:
+                  bin.lid_status || "Closed",
+
+
+                lastUpdated:
+                  bin.last_updated ||
+                  new Date().toISOString(),
+
+
+                lastReset:
+                  bin.last_reset || null,
+
+
+                status:
+                  bin.status || "Normal"
+              };
+
+            }
+          );
+
         }
 
-        // Send Firebase data to dashboard
+
+        // Notify dashboard
         this.notifyListeners();
 
       },
+
+
       (error) => {
 
         console.error(
@@ -108,38 +160,49 @@ class SmartBinDatabaseService {
 
       }
     );
+
   }
 
 
-  /**
-   * Subscribe dashboard to Firebase updates
-   */
+  // ==========================================================
+  // Dashboard Subscription
+  // ==========================================================
+
   onValue(callback) {
 
     this.listeners.push(callback);
 
-    // Send current data immediately
+
+    // Immediately send current data
     if (this.bins.length > 0) {
+
       callback(this.bins);
+
     }
 
+
+    // Return unsubscribe function
     return () => {
 
       this.listeners =
         this.listeners.filter(
-          cb => cb !== callback
+          (cb) => cb !== callback
         );
 
     };
+
   }
 
 
-  /**
-   * Notify dashboard listeners
-   */
+  // ==========================================================
+  // Notify Dashboard
+  // ==========================================================
+
   notifyListeners() {
 
-    for (const listener of this.listeners) {
+    for (
+      const listener of this.listeners
+    ) {
 
       listener(this.bins);
 
@@ -148,9 +211,10 @@ class SmartBinDatabaseService {
   }
 
 
-  /**
-   * Get current bins
-   */
+  // ==========================================================
+  // Get Current Bins
+  // ==========================================================
+
   async getBins() {
 
     return [...this.bins];
@@ -158,145 +222,246 @@ class SmartBinDatabaseService {
   }
 
 
-  /**
-   * Simulate deposit directly in Firebase
-   *
-   * Useful for testing the dashboard.
-   */
+  // ==========================================================
+  // Simulate Deposit
+  // ==========================================================
+
   async simulateDeposit(
     binId = "SmartBin-1",
     isBio = true
   ) {
 
-    const binRef =
-      database.ref(`/bins/${binId}`);
+    try {
 
-    const snapshot =
-      await binRef.once("value");
+      const binRef =
+        database.ref(
+          `/bins/${binId}`
+        );
 
-    const bin = snapshot.val();
 
-    if (!bin) {
+      const snapshot =
+        await binRef.once("value");
+
+
+      const bin =
+        snapshot.val();
+
+
+      if (!bin) {
+
+        console.error(
+          "[SmartBinDB] Bin not found:",
+          binId
+        );
+
+        return;
+
+      }
+
+
+      const currentBio =
+        Number(
+          bin.biodegradable_count || 0
+        );
+
+
+      const currentNonBio =
+        Number(
+          bin.non_biodegradable_count || 0
+        );
+
+
+      const updates = {};
+
+
+      if (isBio) {
+
+        updates.biodegradable_count =
+          currentBio + 1;
+
+      } else {
+
+        updates.non_biodegradable_count =
+          currentNonBio + 1;
+
+      }
+
+
+      updates.last_updated =
+        new Date().toISOString();
+
+
+      await binRef.update(
+        updates
+      );
+
+
+      console.log(
+        "[SmartBinDB] Firebase deposit:",
+        isBio
+          ? "BIODEGRADABLE"
+          : "NON-BIODEGRADABLE"
+      );
+
+    }
+
+    catch (error) {
 
       console.error(
-        "Bin not found:",
-        binId
+        "[SmartBinDB] Deposit error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  // ==========================================================
+  // RESET WASTE COUNTS
+  // ==========================================================
+
+  async resetWasteCounts(
+    binId = "SmartBin-1",
+    resetDate = null
+  ) {
+
+    try {
+
+      const binRef =
+        database.ref(
+          `/bins/${binId}`
+        );
+
+
+      const date =
+        resetDate ||
+        new Date().toISOString();
+
+
+      const updates = {
+
+        biodegradable_count: 0,
+
+        non_biodegradable_count: 0,
+
+        last_reset: date,
+
+        last_updated: date
+
+      };
+
+
+      await binRef.update(
+        updates
+      );
+
+
+      console.log(
+        "[SmartBinDB] Waste counts reset:",
+        binId,
+        date
+      );
+
+
+      return date;
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "[SmartBinDB] Reset error:",
+        error
+      );
+
+      throw error;
+
+    }
+
+  }
+
+
+  // ==========================================================
+  // Start Automatic Simulation
+  // ==========================================================
+
+  startAutoSimulation(
+    intervalMs = 8000
+  ) {
+
+    if (this.simulationTimer) {
+
+      console.log(
+        "[SmartBinDB] Simulation already running."
       );
 
       return;
 
     }
-    /**
- * Reset current waste counts after garbage collection
- */
-async resetWasteCounts(binId = "SmartBin-1") {
 
-  const binRef = database.ref(`/bins/${binId}`);
-
-  const resetDate = new Date().toISOString();
-
-  const updates = {
-    biodegradable_count: 0,
-    non_biodegradable_count: 0,
-    last_reset: resetDate,
-    last_updated: resetDate
-  };
-
-  await binRef.update(updates);
-
-  console.log(
-    "[SmartBinDB] Waste counts reset:",
-    binId,
-    resetDate
-  );
-
-  return resetDate;
-}
-
-    const currentBio =
-      Number(bin.biodegradable_count || 0);
-
-    const currentNonBio =
-      Number(bin.non_biodegradable_count || 0);
-
-
-    const updates = {};
-
-    if (isBio) {
-
-      updates.biodegradable_count =
-        currentBio + 1;
-
-    } else {
-
-      updates.non_biodegradable_count =
-        currentNonBio + 1;
-
-    }
-
-
-    updates.last_updated =
-      new Date().toISOString();
-
-
-    await binRef.update(updates);
-
-    console.log(
-      "[SmartBinDB] Firebase deposit:",
-      isBio
-        ? "BIODEGRADABLE"
-        : "NON-BIODEGRADABLE"
-    );
-
-  }
-
-
-  /**
-   * Start dashboard-side simulation
-   */
-  startAutoSimulation(intervalMs = 8000) {
-
-    if (this.simulationTimer) return;
 
     console.log(
       "[SmartBinDB] Firebase auto simulation enabled."
     );
 
+
     this.simulationTimer =
-      setInterval(async () => {
+      setInterval(
+        async () => {
 
-        if (this.bins.length === 0) return;
+          if (
+            this.bins.length === 0
+          ) {
 
-        const randomBin =
-          this.bins[
-            Math.floor(
-              Math.random() *
-              this.bins.length
-            )
-          ];
+            return;
 
-        const isBio =
-          Math.random() > 0.45;
+          }
 
-        await this.simulateDeposit(
-          randomBin.id,
-          isBio
-        );
 
-      }, intervalMs);
+          const randomBin =
+            this.bins[
+              Math.floor(
+                Math.random() *
+                this.bins.length
+              )
+            ];
+
+
+          const isBio =
+            Math.random() > 0.45;
+
+
+          await this.simulateDeposit(
+            randomBin.id,
+            isBio
+          );
+
+        },
+
+        intervalMs
+      );
 
   }
 
 
+  // ==========================================================
+  // Stop Automatic Simulation
+  // ==========================================================
+
   stopAutoSimulation() {
 
-    if (this.simulationTimer) {
+    if (
+      this.simulationTimer
+    ) {
 
       clearInterval(
         this.simulationTimer
       );
 
+
       this.simulationTimer = null;
+
 
       console.log(
         "[SmartBinDB] Auto simulation stopped."
@@ -309,12 +474,22 @@ async resetWasteCounts(binId = "SmartBin-1") {
 }
 
 
-// Create global service
+// ============================================================
+// Create Global Service
+// ============================================================
+
 const smartBinDB =
   new SmartBinDatabaseService();
+
 
 window.smartBinDB =
   smartBinDB;
 
+
 window.firebaseConfig =
   firebaseConfig;
+
+
+console.log(
+  "✓ SmartBin Firebase service loaded successfully."
+);
