@@ -647,3 +647,329 @@ body {
   100% { transform: scale(1.3); opacity: 0; }
 }
 
+
+
+/* ==========================================================================
+   Phase 1 Analytics
+   ========================================================================== */
+
+.phase1-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* FIX: analytics-card is now a flex column so its header stays a fixed
+   size and any content area below it (e.g. the fill-history chart) can
+   grow with `flex: 1` to fill all the height the grid gives the card. */
+.analytics-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wide-card {
+  min-height: 300px;
+}
+
+.analytics-card .card-header {
+  padding: 0.95rem 1.2rem;
+  flex-shrink: 0;
+}
+
+.analytics-live {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+}
+
+.waste-analytics-body {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem;
+}
+
+.donut-chart {
+  --bio-angle: 0deg;
+  width: 145px;
+  height: 145px;
+  flex: 0 0 145px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(
+    var(--color-success) 0deg var(--bio-angle),
+    var(--color-danger) var(--bio-angle) 360deg
+  );
+  position: relative;
+}
+
+.donut-chart::before {
+  content: "";
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  position: absolute;
+}
+
+.donut-center {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.donut-center strong {
+  font-size: 1.55rem;
+}
+
+.donut-center span {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.analytics-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.analytics-legend div {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.analytics-legend strong {
+  margin-left: auto;
+  color: var(--text-primary);
+}
+
+.legend-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legend-square.bio {
+  background: var(--color-success);
+}
+
+.legend-square.nonbio {
+  background: var(--color-danger);
+}
+
+.gps-grid {
+  padding: 1.1rem 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.gps-stat {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.7rem;
+}
+
+.gps-stat span,
+.gps-footer span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.gps-stat strong {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.gps-footer {
+  border-top: 1px solid var(--border-color);
+  padding: 0.75rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.status-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+}
+
+.status-pill.online {
+  color: #34d399;
+  background: rgba(16,185,129,0.15);
+}
+
+.status-pill.offline {
+  color: #fbbf24;
+  background: rgba(245,158,11,0.15);
+}
+
+.history-select {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  padding: 0.4rem 0.65rem;
+}
+
+.history-select option {
+  background: #1e293b;
+}
+
+/* FIX: chart now grows to fill the remaining height of its parent
+   `.analytics-card` (flex: 1) instead of being capped at a fixed
+   pixel height that left dead space below it. `min-height: 0` is
+   required so a flex child is actually allowed to shrink/grow
+   correctly inside a column flex container. */
+.fill-history-chart {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem 1.25rem 0;
+  display: flex;
+  align-items: flex-end;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+
+/* FIX: bars now use height: 100% of the flexed chart area (instead of
+   a fixed 190/220px) so they sit flush against the bottom of the
+   card no matter how tall the card ends up being. */
+.history-bars {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  min-width: max-content;
+  padding: 0.5rem 0.25rem 0.5rem;
+}
+
+.history-bar-column {
+  min-width: 42px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.history-bar {
+  width: 25px;
+  min-height: 4px;
+  background: linear-gradient(180deg, var(--color-primary), #38bdf8);
+  border-radius: 6px 6px 2px 2px;
+}
+
+.history-bar-value,
+.history-bar-label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.detection-table-wrap {
+  overflow-x: auto;
+  padding: 0.75rem 1.1rem 1.1rem;
+}
+
+.detection-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.detection-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  padding: 0.65rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detection-table td {
+  padding: 0.72rem 0.65rem;
+  border-bottom: 1px solid rgba(148,163,184,0.08);
+  color: var(--text-secondary);
+}
+
+.category-pill {
+  display: inline-block;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.bio-pill {
+  color: #34d399;
+  background: rgba(16,185,129,0.14);
+}
+
+.nonbio-pill {
+  color: #f87171;
+  background: rgba(239,68,68,0.14);
+}
+
+.empty-history {
+  width: 100%;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 2rem 1rem;
+}
+
+.empty-history code {
+  color: #a5b4fc;
+}
+
+@media (max-width: 900px) {
+  .phase1-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .waste-analytics-body {
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .waste-analytics-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .donut-chart {
+    margin: auto;
+  }
+
+  .gps-grid {
+    grid-template-columns: 1fr;
+  }
+}
