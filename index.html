@@ -22,7 +22,184 @@
       filter: brightness(0.7) invert(1) contrast(3)
         hue-rotate(200deg) saturate(0.3) brightness(0.7);
     }
+    /* =========================================================
+   PHASE 3 - HARDWARE MONITORING
+   ========================================================= */
 
+.health-grid,
+.lid-grid,
+.camera-grid,
+.ble-control-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.health-item,
+.lid-stat,
+.camera-item,
+.ble-stat {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.health-item span,
+.lid-stat span,
+.camera-item span,
+.ble-stat span,
+.lid-footer span,
+.camera-footer span {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-bottom: 7px;
+}
+
+.health-item strong,
+.lid-stat strong,
+.camera-item strong,
+.ble-stat strong,
+.lid-footer strong,
+.camera-footer strong {
+    font-size: 15px;
+}
+
+.lid-footer,
+.camera-footer {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.ble-action-area {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.ble-open-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 13px 24px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.ble-open-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .health-grid,
+    .lid-grid,
+    .camera-grid,
+    .ble-control-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .health-grid,
+    .lid-grid,
+    .camera-grid,
+    .ble-control-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lid-footer,
+    .camera-footer {
+        flex-direction: column;
+    }
+}
+/* =========================================================
+   HEADER ALERT BUTTON
+   ========================================================= */
+
+.header-alert-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  height: 42px;
+  padding: 0 14px;
+
+  background: rgba(239, 68, 68, 0.10);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 10px;
+
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+#alertCenter {
+  scroll-margin-top: 100px;
+}
+.header-alert-btn:hover {
+  background: rgba(239, 68, 68, 0.20);
+  border-color: #ef4444;
+  transform: translateY(-1px);
+}
+
+.header-alert-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.header-alert-badge {
+  min-width: 20px;
+  height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 5px;
+
+  background: #ef4444;
+  color: #ffffff;
+
+  border-radius: 999px;
+
+  font-size: 0.7rem;
+  font-weight: 800;
+
+  box-shadow: 0 0 0 2px #1e293b;
+}
+
+.header-alert-badge.hidden {
+  display: none;
+}
+
+.header-alert-btn.has-alerts {
+  animation: alertPulse 2s infinite;
+}
+
+@keyframes alertPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35);
+  }
+
+  70% {
+    box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
     /* Reset button */
     .reset-waste-container {
       margin-top: 15px;
@@ -58,6 +235,247 @@
       font-size: 0.85rem;
       color: var(--text-muted);
     }
+
+    /* Phase 2: Alert Center + GPS last-known location */
+    .gps-last-known {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.35);
+    }
+    .gps-last-known-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .gps-last-known-coords {
+      font-weight: 700;
+    }
+    .gps-last-known-time {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .alert-center-card {
+      grid-column: 1 / -1;
+    }
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+    .alert-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.28);
+    }
+    .alert-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-warning);
+    }
+    .alert-dot.critical { background: var(--color-danger); }
+    .alert-dot.warning { background: var(--color-warning); }
+    .alert-dot.info { background: var(--color-info); }
+    .alert-main { min-width: 0; }
+    .alert-title { font-weight: 700; }
+    .alert-message {
+      margin-top: 3px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .alert-meta {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .alert-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: rgba(148, 163, 184, 0.15);
+    }
+    .alert-empty {
+      padding: 22px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .ai-insights-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.ai-insight-item {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-insight-item span {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-bottom: 7px;
+}
+
+.ai-insight-item strong {
+    font-size: 15px;
+}
+
+.ai-message-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.ai-message {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-message span {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-bottom: 8px;
+}
+
+.ai-message strong {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+
+    .ai-insights-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .ai-insights-grid,
+    .ai-message-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+.waste-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.waste-type-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.waste-icon {
+    font-size: 28px;
+}
+
+.waste-type-card span:not(.waste-icon) {
+    display: block;
+    font-size: 12px;
+    opacity: .65;
+    margin-bottom: 5px;
+}
+
+.waste-type-card strong {
+    font-size: 20px;
+}
+
+.waste-total {
+    margin-top: 16px;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.waste-total span {
+    opacity: .7;
+}
+
+.waste-total strong {
+    font-size: 22px;
+}
+
+@media (max-width: 900px) {
+    .waste-breakdown-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .waste-breakdown-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* AI Detection History - fixed height + scroll */
+.detection-table-wrap {
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Keep table header visible while scrolling */
+.detection-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-secondary);
+}
+
+/* Scrollbar */
+.detection-table-wrap::-webkit-scrollbar {
+    width: 8px;
+}
+
+.detection-table-wrap::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.detection-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 10px;
+}
+
+.detection-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.6);
+}
+
   </style>
 </head>
 
@@ -102,37 +520,64 @@
 
     </a>
 
+<div class="nav-links">
 
-    <div class="nav-links">
+  <a href="dashboard.html" class="nav-link active">
+    Map Operations
+  </a>
 
-      <a
-        href="dashboard.html"
-        class="nav-link active"
-      >
-        Map Operations
-      </a>
+  <a href="public_open.html" class="nav-link" target="_blank">
+    Mobile BLE UI ↗
+  </a>
 
-      <a
-        href="public_open.html"
-        class="nav-link"
-        target="_blank"
-      >
-        Mobile BLE UI ↗
-      </a>
 
-      <button
-        id="simToggleBtn"
-        class="filter-btn"
-        style="
-          background: rgba(99, 102, 241, 0.2);
-          border-color: var(--color-primary);
-          color: #fff;
-        "
-      >
-        ⚡ Start Live Simulation
-      </button>
+  <!-- =====================================================
+       HEADER ALERT BUTTON
+       ===================================================== -->
 
-    </div>
+  <button
+    id="headerAlertBtn"
+    class="header-alert-btn"
+    type="button"
+    onclick="scrollToAlertCenter()"
+    title="View system alerts"
+  >
+
+    <span class="header-alert-icon">
+      🔔
+    </span>
+
+    <span>
+      Alerts
+    </span>
+
+    <span
+      id="headerAlertBadge"
+      class="header-alert-badge hidden"
+    >
+      0
+    </span>
+
+  </button>
+
+
+  <!-- =====================================================
+       LIVE SIMULATION
+       ===================================================== -->
+
+  <button
+    id="simToggleBtn"
+    class="filter-btn"
+    style="
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--color-primary);
+      color: #fff;
+    "
+  >
+    ⚡ Start Live Simulation
+  </button>
+
+</div>
 
   </header>
 
@@ -534,6 +979,478 @@
       </aside>
 
     </div>
+
+    <!-- ======================================================= -->
+    <!-- PHASE 1: ANALYTICS, GPS, HISTORY & AI -->
+    <!-- ======================================================= -->
+
+    <section class="phase1-grid">
+
+      <!-- Waste Analytics -->
+      <div class="analytics-card">
+        <div class="card-header">
+          <div class="card-title">📊 Waste Analytics</div>
+          <span class="analytics-live">LIVE</span>
+        </div>
+
+        <div class="waste-analytics-body">
+          <div class="donut-chart" id="wasteDonut">
+            <div class="donut-center">
+              <strong id="analyticsTotalWaste">0</strong>
+              <span>Total Items</span>
+            </div>
+          </div>
+
+          <div class="analytics-legend">
+            <div><span class="legend-square bio"></span> Biodegradable <strong id="analyticsBio">0</strong></div>
+            <div><span class="legend-square nonbio"></span> Non-Biodegradable <strong id="analyticsNonBio">0</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPS Status -->
+      <div class="analytics-card">
+        <div class="card-header">
+          <div class="card-title">📍 GPS Status</div>
+          <span id="gpsStatusBadge" class="status-pill offline">NO FIX</span>
+        </div>
+
+        <div class="gps-grid">
+          <div class="gps-stat"><span>Satellites</span><strong id="gpsSatellites">0</strong></div>
+          <div class="gps-stat"><span>Altitude</span><strong id="gpsAltitude">-- m</strong></div>
+          <div class="gps-stat"><span>Latitude</span><strong id="gpsLatitude">--</strong></div>
+          <div class="gps-stat"><span>Longitude</span><strong id="gpsLongitude">--</strong></div>
+        </div>
+
+        <div class="gps-footer">
+          <span>Last GPS update</span>
+          <strong id="gpsLastUpdate">--</strong>
+        </div>
+
+        <div class="gps-last-known">
+          <div class="gps-last-known-title">Last Known Location</div>
+          <strong id="gpsLastKnownCoords" class="gps-last-known-coords">--</strong>
+          <span id="gpsLastKnownTime" class="gps-last-known-time">No saved GPS position yet</span>
+        </div>
+      </div>
+
+      <!-- Fill History -->
+      <div class="analytics-card wide-card">
+        <div class="card-header">
+          <div class="card-title">📈 Fill-Level History</div>
+          <select id="historyBinSelect" class="history-select"></select>
+        </div>
+
+        <div id="fillHistoryChart" class="fill-history-chart">
+          <div class="empty-history">Waiting for fill-level history...</div>
+        </div>
+      </div>
+
+      <!-- AI Detection History -->
+      <div class="analytics-card wide-card">
+        <div class="card-header">
+          <div class="card-title">🤖 AI Detection History</div>
+          <span id="detectionCountBadge" class="analytics-live">0 DETECTIONS</span>
+        </div>
+
+        <div class="detection-table-wrap">
+          <table class="detection-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Object</th>
+                <th>Confidence</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody id="detectionHistoryBody">
+              <tr><td colspan="4" class="empty-history">No AI detections recorded yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Alert Center -->
+       
+      <div 
+        id="alertCenter"
+        class="analytics-card wide-card alert-center-card">
+        <div class="card-header">
+          <div class="card-title">🔔 Alert Center</div>
+          <span id="alertCountBadge" class="analytics-live">0 ACTIVE</span>
+        </div>
+        <div id="alertCenterList" class="alert-list">
+          <div class="alert-empty">No alerts recorded yet.</div>
+        </div>
+      </div>
+      <!-- Device Health -->
+<div class="analytics-card wide-card" id="deviceHealth">
+    <div class="card-header">
+        <div class="card-title">🔋 Device Health</div>
+        <span id="deviceHealthBadge" class="analytics-live">ONLINE</span>
+    </div>
+
+    <div class="health-grid">
+
+        <div class="health-item">
+            <span>System</span>
+            <strong id="healthSystem">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>Firebase</span>
+            <strong id="healthFirebase">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>GPS</span>
+            <strong id="healthGps">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>Pi Camera</span>
+            <strong id="healthPiCamera">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>USB Camera</span>
+            <strong id="healthUsbCamera">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>BLE</span>
+            <strong id="healthBle">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>Servo</span>
+            <strong id="healthServo">--</strong>
+        </div>
+
+        <div class="health-item">
+            <span>Ultrasonic</span>
+            <strong id="healthUltrasonic">--</strong>
+        </div>
+
+    </div>
+</div><!-- Lid Activity -->
+<div class="analytics-card wide-card" id="lidActivity">
+    <div class="card-header">
+        <div class="card-title">🚪 Lid Activity</div>
+        <span id="lidActivityBadge" class="analytics-live">CLOSED</span>
+    </div>
+
+    <div class="lid-grid">
+
+        <div class="lid-stat">
+            <span>Current Status</span>
+            <strong id="lidCurrentStatus">--</strong>
+        </div>
+
+        <div class="lid-stat">
+            <span>Total Openings</span>
+            <strong id="lidTotalOpenings">0</strong>
+        </div>
+
+        <div class="lid-stat">
+            <span>Automatic Openings</span>
+            <strong id="lidAutoOpenings">0</strong>
+        </div>
+
+        <div class="lid-stat">
+            <span>BLE Openings</span>
+            <strong id="lidBleOpenings">0</strong>
+        </div>
+
+    </div>
+
+    <div class="lid-footer">
+        <div>
+            <span>Last Action</span>
+            <strong id="lidLastAction">--</strong>
+        </div>
+
+        <div>
+            <span>Last Action Time</span>
+            <strong id="lidLastActionTime">--</strong>
+        </div>
+    </div>
+</div>
+<!-- Camera Status -->
+<div class="analytics-card wide-card" id="cameraStatus">
+    <div class="card-header">
+        <div class="card-title">📸 Camera Status</div>
+        <span id="cameraStatusBadge" class="analytics-live">CHECKING</span>
+    </div>
+
+    <div class="camera-grid">
+
+        <div class="camera-item">
+            <span>Pi Camera</span>
+            <strong id="cameraPiStatus">--</strong>
+        </div>
+
+        <div class="camera-item">
+            <span>USB Camera</span>
+            <strong id="cameraUsbStatus">--</strong>
+        </div>
+
+        <div class="camera-item">
+            <span>Last Detected Object</span>
+            <strong id="cameraLastObject">--</strong>
+        </div>
+
+        <div class="camera-item">
+            <span>Category</span>
+            <strong id="cameraLastCategory">--</strong>
+        </div>
+
+        <div class="camera-item">
+            <span>Confidence</span>
+            <strong id="cameraConfidence">--</strong>
+        </div>
+
+        <div class="camera-item">
+            <span>Last Detection</span>
+            <strong id="cameraLastDetection">--</strong>
+        </div>
+
+    </div>
+
+    <div class="camera-footer">
+        <span>Last Inspection Snapshot</span>
+        <strong id="cameraLastInspection">--</strong>
+    </div>
+</div>
+<!-- BLE Control -->
+<div class="analytics-card wide-card" id="bleControl">
+    <div class="card-header">
+        <div class="card-title">📱 BLE Control</div>
+        <span id="bleControlBadge" class="analytics-live">CHECKING</span>
+    </div>
+
+    <div class="ble-control-grid">
+
+        <div class="ble-stat">
+            <span>Device Name</span>
+            <strong id="bleDeviceName">--</strong>
+        </div>
+
+        <div class="ble-stat">
+            <span>Status</span>
+            <strong id="bleDeviceStatus">--</strong>
+        </div>
+
+        <div class="ble-stat">
+            <span>Last Command</span>
+            <strong id="bleLastCommand">--</strong>
+        </div>
+
+        <div class="ble-stat">
+            <span>Last Command Time</span>
+            <strong id="bleLastCommandTime">--</strong>
+        </div>
+
+    </div>
+
+    <div class="ble-action-area">
+        <button
+            id="dashboardOpenLidBtn"
+            class="ble-open-btn"
+            type="button"
+            onclick="openLidFromDashboard()">
+            🚪 OPEN LID
+        </button>
+    </div>
+</div>
+<div class="analytics-card wide-card" id="aiInsights">
+
+  <div class="card-header">
+
+    <div class="card-title">
+      🧠 AI Insights
+    </div>
+
+    <span
+      id="aiInsightsBadge"
+      class="analytics-live"
+    >
+      ANALYZING
+    </span>
+
+  </div>
+
+
+  <div class="ai-insights-grid">
+
+    <!-- Waste Composition -->
+
+    <div class="ai-insight-item">
+
+      <span>
+        Waste Composition
+      </span>
+
+      <strong
+        id="aiWasteComposition"
+      >
+        --
+      </strong>
+
+    </div>
+
+
+    <!-- Most Detected Waste -->
+
+    <div class="ai-insight-item">
+
+      <span>
+        Most Detected Waste
+      </span>
+
+      <strong
+        id="aiMostDetected"
+      >
+        --
+      </strong>
+
+    </div>
+
+
+    <!-- Current Fill -->
+
+    <div class="ai-insight-item">
+
+      <span>
+        Current Fill
+      </span>
+
+      <strong
+        id="aiCurrentFill"
+      >
+        --
+      </strong>
+
+    </div>
+
+
+    <!-- Fill Trend -->
+
+    <div class="ai-insight-item">
+
+      <span>
+        Fill Trend
+      </span>
+
+      <strong
+        id="aiFillTrend"
+      >
+        --
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="ai-message-grid">
+
+    <div class="ai-message">
+
+      <span>
+        🤖 System Insight
+      </span>
+
+      <strong
+        id="aiSystemInsight"
+      >
+        Analyzing bin data...
+      </strong>
+
+    </div>
+
+
+    <div class="ai-message">
+
+      <span>
+        ♻️ Waste Insight
+      </span>
+
+      <strong
+        id="aiWasteInsight"
+      >
+        Analyzing waste data...
+      </strong>
+
+    </div>
+
+  </div>
+
+</div>
+<div class="analytics-card wide-card" id="wasteBreakdown">
+    <div class="card-header">
+        <div class="card-title">♻️ Waste Type Breakdown</div>
+        <span id="wasteBreakdownBadge" class="analytics-live">LIVE</span>
+    </div>
+
+    <div class="waste-breakdown-grid">
+
+        <div class="waste-type-card">
+            <span class="waste-icon">🥬</span>
+            <div>
+                <span>Organic</span>
+                <strong id="organicCount">0</strong>
+            </div>
+        </div>
+
+        <div class="waste-type-card">
+            <span class="waste-icon">📄</span>
+            <div>
+                <span>Paper</span>
+                <strong id="paperCount">0</strong>
+            </div>
+        </div>
+
+        <div class="waste-type-card">
+            <span class="waste-icon">🧴</span>
+            <div>
+                <span>Plastic</span>
+                <strong id="plasticCount">0</strong>
+            </div>
+        </div>
+
+        <div class="waste-type-card">
+            <span class="waste-icon">🥫</span>
+            <div>
+                <span>Metal</span>
+                <strong id="metalCount">0</strong>
+            </div>
+        </div>
+
+        <div class="waste-type-card">
+            <span class="waste-icon">🍾</span>
+            <div>
+                <span>Glass</span>
+                <strong id="glassCount">0</strong>
+            </div>
+        </div>
+
+        <div class="waste-type-card">
+            <span class="waste-icon">📦</span>
+            <div>
+                <span>Bulky</span>
+                <strong id="bulkyCount">0</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="waste-total">
+        <span>Total Detected Waste</span>
+        <strong id="totalWasteDetected">0</strong>
+    </div>
+</div>
+    </section>
 
   </main>
 
@@ -1037,7 +1954,12 @@
           );
 
         }
-
+          updateDeviceHealth(bin);
+          updateLidActivity(bin);
+          updateCameraStatus(bin);
+          updateBleControl(bin);
+          updateAIInsights(bin);
+          updateWasteBreakdown(bin);
 
         // ------------------------------------------------------
         // STATUS
@@ -1104,9 +2026,16 @@
         // MAP MARKER
         // ------------------------------------------------------
 
+        const mapLat = bin.gpsFix ? bin.lat : bin.lastKnownLat;
+        const mapLng = bin.gpsFix ? bin.lng : bin.lastKnownLng;
+
+        if (!Number.isFinite(mapLat) || !Number.isFinite(mapLng)) {
+          return;
+        }
+
         const marker =
           L.marker(
-            [bin.lat, bin.lng],
+            [mapLat, mapLng],
             {
               icon:
                 createCustomMarker(bin)
@@ -1265,6 +2194,244 @@
 
 
     // ==========================================================
+    // PHASE 1 ANALYTICS
+    // ==========================================================
+
+    let phase1Bins = [];
+
+    function formatShortTime(value) {
+      if (!value) return "--";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime())
+        ? String(value)
+        : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function updateWasteAnalytics(bins) {
+      const bio = bins.reduce((sum, b) => sum + Number(b.biodegradableCount || 0), 0);
+      const nonBio = bins.reduce((sum, b) => sum + Number(b.nonBiodegradableCount || 0), 0);
+      const total = bio + nonBio;
+
+      document.getElementById("analyticsBio").innerText = bio.toLocaleString();
+      document.getElementById("analyticsNonBio").innerText = nonBio.toLocaleString();
+      document.getElementById("analyticsTotalWaste").innerText = total.toLocaleString();
+
+      const donut = document.getElementById("wasteDonut");
+      const bioPercent = total ? (bio / total) * 100 : 0;
+      donut.style.setProperty("--bio-angle", `${bioPercent * 3.6}deg`);
+    }
+
+    function updateGpsPanel(bins) {
+      if (!bins.length) return;
+
+      const bin = bins[0];
+      const badge = document.getElementById("gpsStatusBadge");
+      const hasCurrentFix = Boolean(bin.gpsFix);
+      const lastLat = Number.isFinite(bin.lastKnownLat) ? bin.lastKnownLat : bin.lat;
+      const lastLng = Number.isFinite(bin.lastKnownLng) ? bin.lastKnownLng : bin.lng;
+
+      badge.innerText = hasCurrentFix ? "GPS FIXED" : "NO FIX";
+      badge.className = `status-pill ${hasCurrentFix ? "online" : "offline"}`;
+
+      document.getElementById("gpsSatellites").innerText = bin.gpsSatellites || 0;
+      document.getElementById("gpsAltitude").innerText =
+        bin.gpsAltitude ? `${Number(bin.gpsAltitude).toFixed(1)} m` : "-- m";
+      document.getElementById("gpsLatitude").innerText =
+        Number.isFinite(bin.lat) ? Number(bin.lat).toFixed(6) : "--";
+      document.getElementById("gpsLongitude").innerText =
+        Number.isFinite(bin.lng) ? Number(bin.lng).toFixed(6) : "--";
+      document.getElementById("gpsLastUpdate").innerText =
+        formatShortTime(bin.gpsLastUpdate || bin.lastUpdated);
+
+      const lastKnownCoords = document.getElementById("gpsLastKnownCoords");
+      const lastKnownTime = document.getElementById("gpsLastKnownTime");
+
+      if (Number.isFinite(lastLat) && Number.isFinite(lastLng)) {
+        lastKnownCoords.innerText = `${Number(lastLat).toFixed(6)}, ${Number(lastLng).toFixed(6)}`;
+        lastKnownTime.innerText = hasCurrentFix
+          ? `Current GPS fix • updated ${formatShortTime(bin.gpsLastUpdate || bin.lastUpdated)}`
+          : `GPS signal lost • last valid fix ${formatShortTime(bin.lastKnownGpsTime || bin.gpsLastUpdate || bin.lastUpdated)}`;
+      } else {
+        lastKnownCoords.innerText = "No saved GPS position";
+        lastKnownTime.innerText = "The dustbin has not reported a valid GPS fix yet.";
+      }
+    }
+
+    function getAlertEntries(alertObject) {
+      if (!alertObject || typeof alertObject !== "object") return [];
+
+      return Object.entries(alertObject)
+        .map(([key, value]) => ({
+          id: key,
+          ...(value || {})
+        }))
+        .filter(alert => alert.timestamp)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }
+
+    function renderAlertCenter(bins) {
+      const container = document.getElementById("alertCenterList");
+      const badge = document.getElementById("alertCountBadge");
+      if (!container || !badge) return;
+
+      const alerts = bins.flatMap(bin =>
+        getAlertEntries(bin.alerts).map(alert => ({ ...alert, binName: bin.name, binId: bin.id }))
+      ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      const activeAlerts = alerts.filter(alert => !alert.acknowledged);
+      badge.innerText = `${activeAlerts.length} ACTIVE`;
+
+      if (!alerts.length) {
+        container.innerHTML = '<div class="alert-empty">No alerts recorded yet.</div>';
+        return;
+      }
+
+      container.innerHTML = alerts.slice(0, 30).map(alert => {
+        const severity = String(alert.severity || "INFO").toLowerCase();
+        const status = alert.acknowledged ? "ACKNOWLEDGED" : "ACTIVE";
+        return `
+          <div class="alert-item">
+            <span class="alert-dot ${severity}"></span>
+            <div class="alert-main">
+              <div class="alert-title">${alert.type || "SYSTEM_ALERT"} · ${alert.binName || alert.binId || "SmartBin"}</div>
+              <div class="alert-message">${alert.message || "No alert message provided."}</div>
+            </div>
+            <div class="alert-meta">
+              ${formatShortTime(alert.timestamp)}
+              <div class="alert-badge">${severity.toUpperCase()} · ${status}</div>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    function getHistoryEntries(historyObject) {
+      if (!historyObject || typeof historyObject !== "object") return [];
+
+      return Object.entries(historyObject)
+        .map(([key, value]) => {
+          if (typeof value === "number") {
+            return { time: key, value };
+          }
+          return {
+            time: value.timestamp || key,
+            value: Number( value.fillPercentage ?? value.fill_percentage ?? value.fill ?? value.value ?? 0)
+          };
+        })
+        .filter(item => Number.isFinite(item.value))
+        .sort((a, b) => new Date(a.time) - new Date(b.time))
+        .slice(-24);
+    }
+
+    function renderFillHistory(bin) {
+      const container = document.getElementById("fillHistoryChart");
+      const entries = getHistoryEntries(bin?.fillHistory);
+
+      if (!entries.length) {
+        container.innerHTML = `
+          <div class="empty-history">
+            No stored history yet.<br>
+            <small>The Raspberry Pi must publish <code>fill_history</code> data.</small>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="history-bars">
+          ${entries.map(item => {
+            const value = Math.max(0, Math.min(100, item.value));
+            const heightPct = Math.max(2, value);
+            return `
+              <div class="history-bar-column" title="${value.toFixed(1)}% at ${formatShortTime(item.time)}">
+                <div class="history-bar-value">${Math.round(value)}%</div>
+                <div class="history-bar" style="height:${heightPct}%"></div>
+                <div class="history-bar-label">${formatShortTime(item.time)}</div>
+              </div>`;
+          }).join("")}
+        </div>`;
+    }
+
+    function renderDetectionHistory(bin) {
+      const body = document.getElementById("detectionHistoryBody");
+      const entries = bin ? getDetectionEntries(bin.detectionHistory) : [];
+
+      document.getElementById("detectionCountBadge").innerText =
+        `${entries.length} DETECTIONS`;
+
+      if (!entries.length) {
+        body.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-history">
+              No AI detections recorded yet.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      body.innerHTML = entries.slice().reverse().map(item => `
+        <tr>
+          <td>${formatShortTime(item.time)}</td>
+          <td><strong>${escapeHtml(item.object)}</strong></td>
+          <td>${Math.round(item.confidence * 100)}%</td>
+          <td>
+            <span class="category-pill ${item.category === "BIODEGRADABLE" ? "bio-pill" : "nonbio-pill"}">
+              ${escapeHtml(item.category)}
+            </span>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function getDetectionEntries(historyObject) {
+      if (!historyObject || typeof historyObject !== "object") return [];
+
+      return Object.entries(historyObject)
+        .map(([key, value]) => ({
+          time: value.timestamp || key,
+          object: value.object || value.class_name || value.class || "Unknown",
+          confidence: Number(value.confidence ?? 0),
+          category: value.category || "UNKNOWN"
+        }))
+        .filter(item => item.object)
+        .sort((a, b) => new Date(a.time) - new Date(b.time))
+        .slice(-30);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function updateHistoryBinSelector(bins) {
+      const select = document.getElementById("historyBinSelect");
+      const previous = select.value;
+
+      select.innerHTML = bins.map(bin =>
+        `<option value="${escapeHtml(bin.id)}">${escapeHtml(bin.name)}</option>`
+      ).join("");
+
+      if (previous && bins.some(bin => bin.id === previous)) {
+        select.value = previous;
+      }
+
+      const selected = bins.find(bin => bin.id === select.value) || bins[0];
+      renderFillHistory(selected);
+      renderDetectionHistory(selected);
+    }
+
+    function updatePhase1(bins) {
+      phase1Bins = bins;
+      updateWasteAnalytics(bins);
+      updateGpsPanel(bins);
+      updateHistoryBinSelector(bins);
+      renderAlertCenter(bins);
+    }
+
+
+    // ==========================================================
     // DOM CONTENT LOADED
     // ==========================================================
 
@@ -1290,6 +2457,8 @@
             renderDashboard(
               bins
             );
+
+            updatePhase1(bins);
 
           }
         );
@@ -1342,6 +2511,16 @@
             );
 
           });
+
+
+
+        document.getElementById("historyBinSelect").addEventListener("change", (event) => {
+          const selected = phase1Bins.find(bin => bin.id === event.target.value);
+          if (selected) {
+            renderFillHistory(selected);
+            renderDetectionHistory(selected);
+          }
+        });
 
 
         // ------------------------------------------------------
@@ -1411,7 +2590,537 @@
 
       }
     );
+    function scrollToAlertCenter() {
 
+  const alertCenter =
+    document.getElementById("alertCenter");
+
+  if (!alertCenter) {
+    console.error(
+      "Alert Center element not found."
+    );
+    return;
+  }
+
+  alertCenter.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+}
+
+// =========================================================
+// PHASE 3 - DEVICE HEALTH
+// =========================================================
+
+function updateDeviceHealth(bin) {
+
+    const health = bin.deviceHealth || {};
+
+    const system = health.device_status || "--";
+    const firebase = health.firebase_status || "--";
+    const gps = health.gps_status || "--";
+    const piCamera = health.pi_camera_status || "--";
+    const usbCamera = health.usb_camera_status || "--";
+    const ble = health.ble_status || "--";
+    const servo = health.servo_status || "--";
+    const ultrasonic = health.ultrasonic_status || "--";
+
+    document.getElementById("healthSystem").innerText = system;
+    document.getElementById("healthFirebase").innerText = firebase;
+    document.getElementById("healthGps").innerText = gps;
+    document.getElementById("healthPiCamera").innerText = piCamera;
+    document.getElementById("healthUsbCamera").innerText = usbCamera;
+    document.getElementById("healthBle").innerText = ble;
+    document.getElementById("healthServo").innerText = servo;
+    document.getElementById("healthUltrasonic").innerText = ultrasonic;
+
+    document.getElementById("deviceHealthBadge").innerText =
+        system.toUpperCase();
+}
+
+
+// =========================================================
+// PHASE 3 - LID ACTIVITY
+// =========================================================
+
+function updateLidActivity(bin) {
+
+    const lid = bin.lidActivity || {};
+
+    const currentStatus =
+        lid.current_status || bin.lidStatus || "--";
+
+    document.getElementById("lidCurrentStatus").innerText =
+        currentStatus;
+
+    document.getElementById("lidTotalOpenings").innerText =
+        lid.total_open_count ?? 0;
+
+    document.getElementById("lidAutoOpenings").innerText =
+        lid.automatic_open_count ?? 0;
+
+    document.getElementById("lidBleOpenings").innerText =
+        lid.ble_open_count ?? 0;
+
+    document.getElementById("lidLastAction").innerText =
+        lid.last_action || "--";
+
+    document.getElementById("lidLastActionTime").innerText =
+        formatHardwareTime(lid.last_action_time);
+
+    document.getElementById("lidActivityBadge").innerText =
+        currentStatus.toUpperCase();
+}
+
+
+// =========================================================
+// PHASE 3 - CAMERA STATUS
+// =========================================================
+
+function updateCameraStatus(bin) {
+
+    const camera = bin.cameraStatus || {};
+
+    const piCamera =
+        camera.pi_camera || "--";
+
+    const usbCamera =
+        camera.usb_camera || "--";
+
+    document.getElementById("cameraPiStatus").innerText =
+        piCamera;
+
+    document.getElementById("cameraUsbStatus").innerText =
+        usbCamera;
+
+    document.getElementById("cameraLastObject").innerText =
+        camera.last_detected_object || "--";
+
+    document.getElementById("cameraLastCategory").innerText =
+        camera.last_detection_category || "--";
+
+    const confidence =
+        camera.last_detection_confidence;
+
+    document.getElementById("cameraConfidence").innerText =
+        confidence !== undefined &&
+        confidence !== null &&
+        confidence !== 0
+            ? (Number(confidence) * 100).toFixed(1) + "%"
+            : "--";
+
+    document.getElementById("cameraLastDetection").innerText =
+        formatHardwareTime(camera.last_waste_detection);
+
+    document.getElementById("cameraLastInspection").innerText =
+        formatHardwareTime(camera.last_inspection_snapshot);
+
+    if (
+        piCamera === "Online" ||
+        usbCamera === "Online"
+    ) {
+        document.getElementById("cameraStatusBadge").innerText =
+            "ONLINE";
+    } else {
+        document.getElementById("cameraStatusBadge").innerText =
+            "OFFLINE";
+    }
+}
+
+
+// =========================================================
+// PHASE 3 - BLE CONTROL
+// =========================================================
+
+function updateBleControl(bin) {
+
+    const ble = bin.bleControl || {};
+
+    const deviceName =
+        ble.device_name || "--";
+
+    const status =
+        ble.status || "--";
+
+    document.getElementById("bleDeviceName").innerText =
+        deviceName;
+
+    document.getElementById("bleDeviceStatus").innerText =
+        status;
+
+    document.getElementById("bleLastCommand").innerText =
+        ble.last_command || "--";
+
+    document.getElementById("bleLastCommandTime").innerText =
+        formatHardwareTime(ble.last_command_time);
+
+    document.getElementById("bleControlBadge").innerText =
+        status.toUpperCase();
+}
+
+
+// =========================================================
+// HARDWARE TIME FORMATTER
+// =========================================================
+
+function formatHardwareTime(timestamp) {
+
+    if (!timestamp) {
+        return "--";
+    }
+
+    try {
+
+        const date = new Date(timestamp);
+
+        if (isNaN(date.getTime())) {
+            return "--";
+        }
+
+        return date.toLocaleString();
+
+    } catch (error) {
+
+        return "--";
+    }
+}
+function updateAIInsights(bin) {
+
+    const bio =
+        Number(bin.biodegradableCount || 0);
+
+    const nonBio =
+        Number(bin.nonBiodegradableCount || 0);
+
+    const fill =
+        Number(bin.fillPercentage || 0);
+    
+
+    // ==========================================================
+    // WASTE COMPOSITION
+    // ==========================================================
+
+    const totalWaste =
+        bio + nonBio;
+
+    let wasteComposition = "--";
+
+    if (totalWaste > 0) {
+
+        const bioPercent =
+            ((bio / totalWaste) * 100).toFixed(1);
+
+        const nonBioPercent =
+            ((nonBio / totalWaste) * 100).toFixed(1);
+
+        wasteComposition =
+            `Bio ${bioPercent}% | Non-Bio ${nonBioPercent}%`;
+
+    }
+
+    document.getElementById(
+        "aiWasteComposition"
+    ).innerText = wasteComposition;
+
+
+    // ==========================================================
+    // CURRENT FILL
+    // ==========================================================
+
+    document.getElementById(
+        "aiCurrentFill"
+    ).innerText =
+        fill.toFixed(1) + "%";
+
+
+    // ==========================================================
+    // WASTE INSIGHT
+    // ==========================================================
+
+    let wasteInsight = "";
+
+    if (totalWaste === 0) {
+
+        wasteInsight =
+            "No waste detection data available yet.";
+
+    }
+    else if (nonBio > bio) {
+
+        wasteInsight =
+            "Non-biodegradable waste is currently higher.";
+
+    }
+    else if (bio > nonBio) {
+
+        wasteInsight =
+            "Biodegradable waste is currently higher.";
+
+    }
+    else {
+
+        wasteInsight =
+            "Both waste categories are currently equal.";
+
+    }
+
+    document.getElementById(
+        "aiWasteInsight"
+    ).innerText = wasteInsight;
+
+
+    // ==========================================================
+    // SYSTEM INSIGHT
+    // ==========================================================
+
+    let systemInsight = "";
+
+    if (fill >= 80) {
+
+        systemInsight =
+            "Bin is at a high fill level and should be checked.";
+
+    }
+    else if (fill >= 50) {
+
+        systemInsight =
+            "Bin is moderately filled.";
+
+    }
+    else {
+
+        systemInsight =
+            "Bin currently has sufficient available capacity.";
+
+    }
+
+    document.getElementById(
+        "aiSystemInsight"
+    ).innerText = systemInsight;
+
+
+    // ==========================================================
+    // MOST DETECTED WASTE
+    // ==========================================================
+
+    const detectionHistory =
+        bin.detectionHistory || {};
+
+    const detectionCounts = {};
+
+    Object.values(
+        detectionHistory
+    ).forEach(detection => {
+
+        if (!detection) {
+            return;
+        }
+
+        const objectName =
+            detection.object ||
+            detection.object_name ||
+            detection.name;
+
+        if (!objectName) {
+            return;
+        }
+
+        detectionCounts[objectName] =
+            (detectionCounts[objectName] || 0) + 1;
+
+    });
+
+
+    let mostDetected = "--";
+    let highestCount = 0;
+
+    Object.entries(
+        detectionCounts
+    ).forEach(([name, count]) => {
+
+        if (count > highestCount) {
+
+            highestCount = count;
+            mostDetected = name;
+
+        }
+
+    });
+
+
+    if (highestCount > 0) {
+
+        mostDetected =
+            `${mostDetected} (${highestCount})`;
+
+    }
+
+    document.getElementById(
+        "aiMostDetected"
+    ).innerText = mostDetected;
+
+
+    // ==========================================================
+    // FILL TREND
+    // ==========================================================
+
+    const fillHistory =
+        bin.fillHistory || {};
+
+    const fillRecords =
+        Object.values(
+            fillHistory
+        )
+        .filter(item =>
+            item &&
+            item.fillPercentage !== undefined
+        )
+        .map(item => ({
+
+            value:
+                Number(
+                    item.fillPercentage
+                ),
+
+            time:
+                new Date(
+                    item.timestamp || 0
+                ).getTime()
+
+        }))
+        .filter(item =>
+            !Number.isNaN(item.value)
+        )
+        .sort((a, b) =>
+            a.time - b.time
+        );
+
+
+    let fillTrend = "No Data";
+
+    if (fillRecords.length >= 2) {
+
+        const first =
+            fillRecords[0].value;
+
+        const latest =
+            fillRecords[
+                fillRecords.length - 1
+            ].value;
+
+        const difference =
+            latest - first;
+
+
+        if (difference > 5) {
+
+            fillTrend =
+                "↑ Increasing";
+
+        }
+        else if (difference < -5) {
+
+            fillTrend =
+                "↓ Decreasing";
+
+        }
+        else {
+
+            fillTrend =
+                "→ Stable";
+
+        }
+
+    }
+
+
+    document.getElementById(
+        "aiFillTrend"
+    ).innerText = fillTrend;
+
+
+    // ==========================================================
+    // AI INSIGHTS STATUS
+    // ==========================================================
+
+    document.getElementById(
+        "aiInsightsBadge"
+    ).innerText = "UPDATED";
+}
+function updateWasteBreakdown(bin) {
+
+    const detectionHistory = bin.detectionHistory || {};
+
+    const counts = {
+        organic: 0,
+        paper: 0,
+        plastic: 0,
+        metal: 0,
+        glass: 0,
+        bulky: 0
+    };
+
+    Object.values(detectionHistory).forEach(detection => {
+
+        if (!detection) return;
+
+        const objectName = (
+            detection.object ||
+            detection.object_name ||
+            detection.name ||
+            ""
+        ).toLowerCase().trim();
+
+        if (objectName === "organic") {
+            counts.organic++;
+        }
+        else if (objectName === "paper") {
+            counts.paper++;
+        }
+        else if (objectName === "plastic") {
+            counts.plastic++;
+        }
+        else if (objectName === "metal") {
+            counts.metal++;
+        }
+        else if (objectName === "glass") {
+            counts.glass++;
+        }
+        else if (objectName === "bulky") {
+            counts.bulky++;
+        }
+    });
+
+    document.getElementById("organicCount").innerText =
+        counts.organic;
+
+    document.getElementById("paperCount").innerText =
+        counts.paper;
+
+    document.getElementById("plasticCount").innerText =
+        counts.plastic;
+
+    document.getElementById("metalCount").innerText =
+        counts.metal;
+
+    document.getElementById("glassCount").innerText =
+        counts.glass;
+
+    document.getElementById("bulkyCount").innerText =
+        counts.bulky;
+
+    const total =
+        counts.organic +
+        counts.paper +
+        counts.plastic +
+        counts.metal +
+        counts.glass +
+        counts.bulky;
+
+    document.getElementById("totalWasteDetected").innerText =
+        total;
+}
   </script>
 
 </body>
