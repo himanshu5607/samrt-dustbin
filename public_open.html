@@ -8,13 +8,140 @@
   <link rel="stylesheet" href="css/style.css">
   
   <style>
-    /* Mobile app container overrides */
+    * { box-sizing: border-box; }
+
     body {
-      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 18px 12px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(99,102,241,.28), transparent 38%),
+        radial-gradient(circle at 0% 100%, rgba(59,130,246,.12), transparent 35%),
+        #070b14;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      overflow-x: hidden;
+    }
+
+    .mobile-wrapper { width: 100%; max-width: 430px; }
+
+    .mobile-card {
+      width: 100%;
+      padding: 24px 18px 20px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 28px;
+      background: rgba(17,24,39,.88);
+      box-shadow: 0 24px 70px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .ble-header-icon {
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 14px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: #c7d2fe;
+      background: linear-gradient(145deg,rgba(96,165,250,.18),rgba(129,140,248,.12));
+      border: 1px solid rgba(129,140,248,.24);
+      box-shadow: 0 12px 30px rgba(79,70,229,.15);
+      transition: .25s ease;
+    }
+
+    .ble-header-icon.connected {
+      color: #6ee7b7;
+      background: rgba(16,185,129,.13);
+      border-color: rgba(52,211,153,.3);
+      box-shadow: 0 12px 30px rgba(16,185,129,.16);
+    }
+
+    .connection-pill {
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.045);
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .pill-connected {
+      color: #6ee7b7;
+      background: rgba(16,185,129,.09);
+      border-color: rgba(52,211,153,.24);
+    }
+
+    .pill-disconnected { color: #cbd5e1; }
+
+    .pill-error {
+      color: #fca5a5;
+      background: rgba(248,113,113,.09);
+      border-color: rgba(248,113,113,.24);
+    }
+
+    .status-indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .pill-connected .status-indicator-dot {
+      background: #34d399;
+      box-shadow: 0 0 0 4px rgba(52,211,153,.12), 0 0 12px rgba(52,211,153,.55);
+    }
+
+    .action-btn {
+      width: 100%;
+      min-height: 54px;
+      border-radius: 16px !important;
+      font-size: .95rem !important;
+      font-weight: 800 !important;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    .action-btn:active { transform: scale(.98); }
+
+    .btn-primary { box-shadow: 0 12px 26px rgba(59,130,246,.2); }
+    .btn-success { box-shadow: 0 12px 26px rgba(16,185,129,.18); }
+
+    .btn-disconnect {
+      margin-top: 14px;
+      min-height: 44px;
+      font-size: .82rem !important;
+    }
+
+    .timer-ring-container {
+      width: 150px !important;
+      height: 150px !important;
+      margin: 12px auto 18px !important;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .timer-countdown {
+      font-size: 3.2rem !important;
+      font-weight: 900 !important;
+      line-height: 1;
+      text-shadow: 0 0 24px rgba(52,211,153,.3);
+    }
+@media (max-width: 420px) {
+      body { padding: 10px; justify-content: flex-start; }
+
+      .mobile-card {
+        margin-top: 6px;
+        padding: 20px 15px 16px;
+        border-radius: 24px;
+      }
     }
   </style>
 </head>
@@ -57,12 +184,7 @@
             Ensure Bluetooth is turned on and you are within 3 meters of the bin.
           </p>
 
-          <!-- Simulation mode option for desktop / test evaluation -->
-          <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-            <button id="simulateConnectBtn" class="filter-btn" style="width:100%; padding:0.6rem; font-size:0.8rem;">
-              🧪 Test Mode: Simulate BLE Connection
-            </button>
-          </div>
+
         </div>
 
         <!-- State 2: Connected Controls (Hidden initially, shown upon successful connection) -->
@@ -84,7 +206,7 @@
           <div id="lidOpenView" style="display: none;">
             <div class="timer-ring-container">
               <div class="pulse-circle"></div>
-              <div class="timer-countdown" id="countdownSecs">5</div>
+              <div class="timer-countdown" id="countdownSecs">10</div>
             </div>
             <p style="font-size: 1.1rem; font-weight: 700; color: #10b981;">Lid is Open!</p>
             <p style="font-size: 0.8rem; color: var(--text-secondary);">Drop waste now. Auto-closing in seconds...</p>
@@ -102,18 +224,9 @@
 
       </div>
 
-      <!-- Mini Live Activity Log -->
-      <div class="ble-terminal" id="terminalLog">
-        <div class="ble-terminal-line">[SYS] Initialized Web Bluetooth service.</div>
-        <div class="ble-terminal-line">[INFO] Target Service UUID: 12345678-1234-5678-1234-56789abcdef0</div>
       </div>
 
-      <!-- Navigation link -->
-      <div style="margin-top: 1.5rem;">
-        <a href="dashboard.html" style="font-size: 0.8rem; color: var(--color-info); text-decoration: none;">
-          ← Return to Collector Operations Dashboard
-        </a>
-      </div>
+
 
     </div>
   </div>
@@ -135,13 +248,11 @@
     const lidOpenView = document.getElementById("lidOpenView");
     const countdownSecs = document.getElementById("countdownSecs");
     const connectBtn = document.getElementById("connectBtn");
-    const simulateConnectBtn = document.getElementById("simulateConnectBtn");
     const openLidBtn = document.getElementById("openLidBtn");
     const disconnectBtn = document.getElementById("disconnectBtn");
     const connectionPill = document.getElementById("connectionPill");
     const connectionPillText = document.getElementById("connectionPillText");
     const bleStatusIcon = document.getElementById("bleStatusIcon");
-    const terminalLog = document.getElementById("terminalLog");
 
     // Bluetooth connection handles
     let bluetoothDevice = null;
@@ -149,14 +260,16 @@
     let lidCharacteristic = null;
     let isSimulated = false;
     let countdownInterval = null;
+    function showUserStatus(message, type = "info") {
+      connectionPillText.textContent = message;
 
-    function log(msg) {
-      const line = document.createElement("div");
-      line.className = "ble-terminal-line";
-      const timestamp = new Date().toLocaleTimeString();
-      line.textContent = `[${timestamp}] ${msg}`;
-      terminalLog.appendChild(line);
-      terminalLog.scrollTop = terminalLog.scrollHeight;
+      if (type === "success") {
+        connectionPill.className = "connection-pill pill-connected";
+      } else if (type === "error") {
+        connectionPill.className = "connection-pill pill-error";
+      } else {
+        connectionPill.className = "connection-pill pill-disconnected";
+      }
     }
 
     // Set UI to Connected State
@@ -189,7 +302,7 @@
     // Handle Hardware Disconnect Event
     function onDisconnected(event) {
       const device = event.target;
-      log(`Device ${device.name || "SmartBin"} disconnected.`);
+      showUserStatus("Disconnected");
       bluetoothDevice = null;
       gattServer = null;
       lidCharacteristic = null;
@@ -199,13 +312,13 @@
     // Connect via Web Bluetooth API
     async function requestBleConnection() {
       if (!navigator.bluetooth) {
-        log("Web Bluetooth is not supported on this browser/platform.");
+
         alert("Web Bluetooth API is not available on this browser. Please use Chrome/Edge or click 'Test Mode: Simulate BLE Connection'.");
         return;
       }
 
       try {
-        log(`Scanning for Bluetooth device named '${BLE_CONFIG.deviceName}'...`);
+        showUserStatus("Searching for SmartBin-1...");
         connectionPillText.textContent = "Requesting device...";
 
         bluetoothDevice = await navigator.bluetooth.requestDevice({
@@ -215,46 +328,35 @@
           ],
           optionalServices: [BLE_CONFIG.serviceUuid]
         });
-
-        log(`Device selected: ${bluetoothDevice.name}. Connecting to GATT Server...`);
+        showUserStatus("Connecting to SmartBin-1...");
         bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
         gattServer = await bluetoothDevice.gatt.connect();
-        log("Connected to GATT Server.");
-
-        log(`Discovering Primary Service (${BLE_CONFIG.serviceUuid})...`);
+        showUserStatus("Connected to SmartBin-1", "success");
         const service = await gattServer.getPrimaryService(BLE_CONFIG.serviceUuid);
-
-        log(`Discovering Characteristic (${BLE_CONFIG.charLidUuid})...`);
         try {
           lidCharacteristic = await service.getCharacteristic(BLE_CONFIG.charLidUuid);
-          log("Lid Characteristic discovered successfully.");
         } catch (charErr) {
-          log("Characteristic not found; falling back to service-level commands.");
         }
 
         isSimulated = false;
         setConnectedUI(bluetoothDevice.name || BLE_CONFIG.deviceName);
-        log("Ready! Tap 'OPEN LID' to actuate servo.");
 
       } catch (err) {
-        log(`Connection Error: ${err.message || err}`);
+        showUserStatus("Unable to connect. Please try again.", "error");
         setDisconnectedUI("Connection failed");
       }
     }
 
     // Trigger Lid Open Command
     async function triggerOpenLid() {
-      log("Sending OPEN command to SmartBin-1...");
 
       try {
         if (!isSimulated && lidCharacteristic) {
           // Send 0x01 byte to characteristic to open lid
           const command = new Uint8Array([0x01]);
           await lidCharacteristic.writeValue(command);
-          log("BLE GATT write successful: 0x01 (OPEN)");
         } else {
-          log("[MOCK] Sent 0x01 OPEN command over virtual BLE channel.");
         }
 
         // Notify Database layer (Firebase or Mock)
@@ -266,7 +368,7 @@
         lidReadyView.style.display = "none";
         lidOpenView.style.display = "block";
 
-        let secondsRemaining = 5;
+        let secondsRemaining = 10;
         countdownSecs.textContent = secondsRemaining;
 
         countdownInterval = setInterval(() => {
@@ -276,8 +378,7 @@
           if (secondsRemaining <= 0) {
             clearInterval(countdownInterval);
             countdownInterval = null;
-
-            log("Timer elapsed: Lid auto-closed.");
+            showUserStatus("Connected to SmartBin-1", "success");
             // Send close command or update database
             if (window.smartBinDB) {
               const isBio = Math.random() > 0.5;
@@ -291,48 +392,29 @@
         }, 1000);
 
       } catch (err) {
-        log(`Failed to write command: ${err.message || err}`);
+        showUserStatus("Could not open the lid. Please try again.", "error");
       }
     }
 
     // Disconnect Action
     function disconnectDevice() {
       if (isSimulated) {
-        log("Virtual device disconnected.");
+
         isSimulated = false;
         setDisconnectedUI("Disconnected");
       } else if (bluetoothDevice && bluetoothDevice.gatt.connected) {
-        log("Disconnecting from GATT server...");
         bluetoothDevice.gatt.disconnect();
       } else {
         setDisconnectedUI("Disconnected");
       }
     }
 
-    // Simulation / Test Mode trigger
-    function simulateConnection() {
-      log("Starting simulation mode for testing...");
-      isSimulated = true;
-      setTimeout(() => {
-        log("Virtual GATT Server connected to 'SmartBin-1'.");
-        setConnectedUI("SmartBin-1 (Simulated)");
-      }, 500);
-    }
-
     // Event Listeners
     connectBtn.addEventListener("click", requestBleConnection);
-    simulateConnectBtn.addEventListener("click", simulateConnection);
     openLidBtn.addEventListener("click", triggerOpenLid);
     disconnectBtn.addEventListener("click", disconnectDevice);
 
-    // Support query param for preview / testing: ?state=connected
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('state') === 'connected') {
-      simulateConnection();
-    } else if (urlParams.get('state') === 'open') {
-      simulateConnection();
-      setTimeout(triggerOpenLid, 300);
-    }
   </script>
 </body>
 </html>
+
